@@ -15,7 +15,7 @@ private:
     vector<uint8_t> messageBlock;
 
     static uint32_t rotateRight(uint32_t value, uint32_t bits) {
-        return (value >> bits) | (value << (32 - bits));
+        return (value >> bits) | (vxzalue << (32 - bits));
     }
 
     static uint32_t choose(uint32_t x, uint32_t y, uint32_t z) {
@@ -107,7 +107,7 @@ public:
         hashValues[5] = 0x9b05688c;
         hashValues[6] = 0x1f83d9ab;
         hashValues[7] = 0x5be0cd19;
-        messageBlock.reserve(64);  // Reserve space for one block
+        messageBlock.reserve(64);
     }
 
     void updateHash(const uint8_t* data, size_t dataLength) {
@@ -115,7 +115,7 @@ public:
             messageBlock.push_back(data[i]);
             if (messageBlock.size() == 64) {
                 processBlock();
-                messageLength += 512;  // 512 bits = 64 bytes
+                messageLength += 512;
                 messageBlock.clear();
             }
         }
@@ -163,7 +163,7 @@ public:
     }
 };
 
-// Initialize round constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes)
+//  Initialize round constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes)
 const uint32_t SHA256::ROUND_CONSTANTS[64] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
