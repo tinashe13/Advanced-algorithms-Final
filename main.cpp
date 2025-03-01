@@ -47,12 +47,11 @@ private:
         uint32_t workingHash[8];
         uint32_t tempHash1, tempHash2;
 
-        // Copy current hash values to working variables
         for (int i = 0; i < 8; ++i) {
             workingHash[i] = hashValues[i];
         }
 
-        // Prepare message schedule
+
         for (int i = 0; i < 16; ++i) {
             messageSchedule[i] = (messageBlock[i * 4] << 24) |
                                 (messageBlock[i * 4 + 1] << 16) |
@@ -60,7 +59,7 @@ private:
                                 (messageBlock[i * 4 + 3]);
         }
 
-        // Extend message schedule
+
         for (int round = 16; round < 64; ++round) {
             messageSchedule[round] = sigma1(messageSchedule[round - 2]) +
                                    messageSchedule[round - 7] +
@@ -68,7 +67,7 @@ private:
                                    messageSchedule[round - 16];
         }
 
-        // Main compression loop
+
         for (int round = 0; round < 64; ++round) {
             tempHash1 = workingHash[7] +
                        upperSigma1(workingHash[4]) +
@@ -79,7 +78,7 @@ private:
             tempHash2 = upperSigma0(workingHash[0]) +
                        majority(workingHash[0], workingHash[1], workingHash[2]);
 
-            // Rotate working variables
+
             workingHash[7] = workingHash[6];
             workingHash[6] = workingHash[5];
             workingHash[5] = workingHash[4];
@@ -90,7 +89,7 @@ private:
             workingHash[0] = tempHash1 + tempHash2;
         }
 
-        // Update hash values
+
         for (int i = 0; i < 8; ++i) {
             hashValues[i] += workingHash[i];
         }
@@ -98,7 +97,7 @@ private:
 
 public:
     SHA256() : messageLength(0) {
-        // Initialize hash values (first 32 bits of the fractional parts of the square roots of the first 8 primes)
+
         hashValues[0] = 0x6a09e667;
         hashValues[1] = 0xbb67ae85;
         hashValues[2] = 0x3c6ef372;
@@ -107,7 +106,7 @@ public:
         hashValues[5] = 0x9b05688c;
         hashValues[6] = 0x1f83d9ab;
         hashValues[7] = 0x5be0cd19;
-        messageBlock.reserve(64);  // Reserve space for one block
+        messageBlock.reserve(64);
     }
 
     void updateHash(const uint8_t* data, size_t dataLength) {
@@ -115,7 +114,7 @@ public:
             messageBlock.push_back(data[i]);
             if (messageBlock.size() == 64) {
                 processBlock();
-                messageLength += 512;  // 512 bits = 64 bytes
+                messageLength += 512;
                 messageBlock.clear();
             }
         }
@@ -131,8 +130,8 @@ public:
                              (56 - originalBlockSize) :
                              (120 - originalBlockSize);
 
-        // Add padding
-        messageBlock.push_back(0x80);  // Append 1 followed by zeros
+
+        messageBlock.push_back(0x80);
         paddingLength--;
 
         while (paddingLength > 0) {
@@ -140,7 +139,7 @@ public:
             paddingLength--;
         }
 
-        // Add message length
+
         messageLength += messageBlock.size() * 8;
         for (int i = 7; i >= 0; --i) {
             messageBlock.push_back(static_cast<uint8_t>((messageLength >> (i * 8)) & 0xFF));
@@ -148,7 +147,7 @@ public:
 
         processBlock();
 
-        // Convert final hash to hexadecimal string
+
         stringstream hashString;
         for (int i = 0; i < 8; ++i) {
             hashString << hex << setw(8) << setfill('0') << hashValues[i];
@@ -163,7 +162,7 @@ public:
     }
 };
 
-// Initialize round constants (first 32 bits of the fractional parts of the cube roots of the first 64 primes)
+
 const uint32_t SHA256::ROUND_CONSTANTS[64] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -185,19 +184,18 @@ int main() {
     }
 
     SHA256 hashCalculator;
-    vector<char> fileBuffer(4096);  // 4KB buffer for file reading
+    vector<char> fileBuffer(4096);
 
     while (inputFile.read(fileBuffer.data(), fileBuffer.size())) {
         hashCalculator.updateHash(reinterpret_cast<uint8_t*>(fileBuffer.data()),inputFile.gcount());
     }
 
-    // Handle any remaining data
     if (inputFile.gcount() > 0) {
         hashCalculator.updateHash(reinterpret_cast<uint8_t*>(fileBuffer.data()),inputFile.gcount());
     }
 
     if (inputFile.bad()) {
-        cerr << "Error occurred while reading the file." << endl;
+        cerr << "An error occurred while reading the file." << endl;
         return 1;
     }
 
